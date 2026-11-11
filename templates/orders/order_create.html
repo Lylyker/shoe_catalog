@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Оформление заказа{% endblock %}
+
+{% block content %}
+<a href="{% url 'orders:cart' %}" class="btn btn-outline-secondary mb-3 d-inline-flex align-items-center gap-2">
+    <span aria-hidden="true">←</span>
+    Назад к корзине
+</a>
+
+<h2>Оформление заказа</h2>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr><th>Товар</th><th>Размер</th><th>Кол-во</th><th>Цена</th></tr>
+    </thead>
+    <tbody>
+        {% for item in basket.items.all %}
+        <tr>
+            <td>{{ item.product_variant.product.name }}</td>
+            <td>{{ item.product_variant.size }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.get_subtotal }} ₽</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3" class="text-end"><strong>Итого:</strong></td>
+            <td><strong>{{ basket.get_total_price }} ₽</strong></td>
+        </tr>
+    </tfoot>
+</table>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label">Способ доставки:</label>
+        <select name="delivery_method" class="form-select" required style="max-width: 400px;">
+            {% for method in delivery_methods %}
+                <option value="{{ method.id }}">{{ method.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-success btn-lg">Подтвердить заказ</button>
+        <a href="{% url 'orders:cart' %}" class="btn btn-outline-secondary btn-lg">Отменить</a>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% if status.name == "Новый" %}
+    <span class="status-badge status-new">{{ status.name }}</span>
+{% elif status.name == "В обработке" %}
+    <span class="status-badge status-processing">{{ status.name }}</span>
+{% elif status.name == "Отправлен" %}
+    <span class="status-badge status-shipped">{{ status.name }}</span>
+{% elif status.name == "Выполнен" %}
+    <span class="status-badge status-done">{{ status.name }}</span>
+{% elif status.name == "Отменён" or status.name == "Отменена" %}
+    <span class="status-badge status-cancelled">{{ status.name }}</span>
+{% else %}
+    <span class="status-badge status-default">{{ status.name }}</span>
+{% endif %}

@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Каталог товаров{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-2">
+        <div class="sidebar">
+            <form method="get" id="filter-form">
+                <h6 class="mb-2"><strong>Категория</strong></h6>
+                <div class="mb-3">
+                    <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Все</option>
+                        {% for category in filter.form.category.field.queryset %}
+                            <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"d" %}selected{% endif %}>{{ category.name }}</option>
+                        {% empty %}
+                            <option disabled>(Отсутствует)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <h6 class="mb-2"><strong>Бренд</strong></h6>
+                <div class="mb-3">
+                    <select name="brand" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Все</option>
+                        {% for brand in filter.form.brand.field.queryset %}
+                            <option value="{{ brand.id }}" {% if request.GET.brand == brand.id|stringformat:"d" %}selected{% endif %}>{{ brand.name }}</option>
+                        {% empty %}
+                            <option disabled>(Отсутствует)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <h6 class="mb-2"><strong>Сезон</strong></h6>
+                <div class="mb-3">
+                    <select name="season" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Все</option>
+                        {% for season in filter.form.season.field.queryset %}
+                            <option value="{{ season.id }}" {% if request.GET.season == season.id|stringformat:"d" %}selected{% endif %}>{{ season.name }}</option>
+                        {% empty %}
+                            <option disabled>(Отсутствует)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <h6 class="mb-2"><strong>Стиль</strong></h6>
+                <div class="mb-3">
+                    <select name="style" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Все</option>
+                        {% for style in filter.form.style.field.queryset %}
+                            <option value="{{ style.id }}" {% if request.GET.style == style.id|stringformat:"d" %}selected{% endif %}>{{ style.name }}</option>
+                        {% empty %}
+                            <option disabled>(Отсутствует)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <h6 class="mb-2"><strong>Целевая группа</strong></h6>
+                <div class="mb-3">
+                    <select name="target_group" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Все</option>
+                        {% for group in filter.form.target_group.field.queryset %}
+                            <option value="{{ group.id }}" {% if request.GET.target_group == group.id|stringformat:"d" %}selected{% endif %}>{{ group.name }}</option>
+                        {% empty %}
+                            <option disabled>(Отсутствует)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <h6 class="mb-2"><strong>Страна</strong></h6>
+                <div class="mb-3">
+                    <select name="country_origin" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Все</option>
+                        {% for country in filter.form.country_origin.field.queryset %}
+                            <option value="{{ country.id }}" {% if request.GET.country_origin == country.id|stringformat:"d" %}selected{% endif %}>{{ country.name }}</option>
+                        {% empty %}
+                            <option disabled>(Отсутствует)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <h6 class="mb-2"><strong>Особенности</strong></h6>
+                <div class="mb-3">
+                    <select name="special_properties" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Все</option>
+                        {% for prop in filter.form.special_properties.field.queryset %}
+                            <option value="{{ prop.id }}" {% if request.GET.special_properties == prop.id|stringformat:"d" %}selected{% endif %}>{{ prop.name }}</option>
+                        {% empty %}
+                            <option disabled>(Отсутствует)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <h6 class="mb-2"><strong>Размер</strong></h6>
+                <div class="mb-3">
+                    <select name="size" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Все</option>
+                        {% for size in filter.form.size.field.queryset %}
+                            <option value="{{ size.id }}" {% if request.GET.size == size.id|stringformat:"d" %}selected{% endif %}>{{ size.name }}</option>
+                        {% empty %}
+                            <option disabled>(Отсутствует)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <h6 class="mb-2"><strong>Цвет</strong></h6>
+                <div class="mb-3">
+                    <select name="color" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Все</option>
+                        {% for color in filter.form.color.field.queryset %}
+                            <option value="{{ color.id }}" {% if request.GET.color == color.id|stringformat:"d" %}selected{% endif %}>{{ color.name }}</option>
+                        {% empty %}
+                            <option disabled>(Отсутствует)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <h6 class="mb-2"><strong>Цена</strong></h6>
+                <div class="mb-3">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="number" name="price_min" class="form-control form-control-sm" placeholder="Мин." value="{{ request.GET.price_min }}" onchange="this.form.submit()">
+                        </div>
+                        <div class="col-6">
+                            <input type="number" name="price_max" class="form-control form-control-sm" placeholder="Макс." value="{{ request.GET.price_max }}" onchange="this.form.submit()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{% url 'catalog:catalog' %}" class="btn btn-outline-secondary btn-sm">Сбросить</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-10">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <form method="get" class="d-flex align-items-center gap-2">
+                {% for key, value in request.GET.items %}
+                    {% if key != 'sort' and key != 'page' %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endif %}
+                {% endfor %}
+                <span class="text-muted">Сортировка:</span>
+                <select name="sort" class="form-select form-select-sm" style="width: 220px;" onchange="this.form.submit()">
+                    <option value="">По умолчанию</option>
+                    <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>По возрастанию цены</option>
+                    <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>По убыванию цены</option>
+                    <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>По названию</option>
+                </select>
+            </form>
+            <span class="text-muted">Найдено товаров: {{ filter.qs.count }}</span>
+        </div>
+
+        <div class="row">
+            {% for product in filter.qs %}
+            <div class="col-md-3 mb-4">
+                <div class="card card-product h-100 {% if product.get_total_quantity <= 3 %}low-stock{% endif %}">
+                    {% if product.photo %}
+                        <img src="{{ product.photo.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <img src="{% static 'img/system/icon/svg/image-off.svg' %}" alt="Изображение отсутствует" class="icon-placeholder">
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h6 class="card-title">{{ product.name }}</h6>
+                        <p class="card-text text-muted small">{{ product.brand }}</p>
+                        <p class="card-text">
+                            {% with price=product.get_discounted_price %}
+                                {% if price != product.retail_price %}
+                                    <span class="price-discount">{{ price|floatformat:2 }} ₽</span>
+                                {% else %}
+                                    <strong>{{ product.retail_price }} ₽</strong>
+                                {% endif %}
+                            {% endwith %}
+                        </p>
+                        <p class="card-text">
+                            {% with status=product.get_availability_status %}
+                                {% if status == "Много" %}
+                                    <span class="badge badge-many">{{ status }}</span>
+                                {% elif status == "Мало" %}
+                                    <span class="badge badge-few">{{ status }}</span>
+                                {% else %}
+                                    <span class="badge badge-none">{{ status }}</span>
+                                {% endif %}
+                            {% endwith %}
+                        </p>
+                        <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-outline-primary btn-sm w-100">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">Товары не найдены</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

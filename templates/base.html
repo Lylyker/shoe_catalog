@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Магазин обуви{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f5f5f7; }
+        .navbar { background-color: #1a1a2e !important; }
+        .nav-inner { position: relative; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+        .nav-left, .nav-right { position: relative; z-index: 2; }
+        .navbar-brand { font-size: 22px; font-weight: bold; color: #fff; }
+        .brand-logo { width: 34px; height: 34px; }
+        .nav-divider { color: #4b5563; margin: 0 12px; font-size: 20px; user-select: none; }
+        .nav-page-name { color: #9ca3af; font-size: 16px; font-weight: 500; white-space: nowrap; }
+        .nav-search { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(620px, 34vw); display: flex; align-items: center; z-index: 1; }
+        .search-input { width: 100%; }
+        .user-name { color: white; font-size: 16px; margin-right: 10px; }
+        .role-badge { color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; margin-right: 15px; font-weight: 500; }
+        .role-buyer { background-color: #6c757d; }
+        .role-manager { background-color: #0d6efd; }
+        .role-admin { background-color: #dc3545; }
+        .nav-manage-link { color: #fff; margin-right: 14px; font-size: 14px; text-decoration: none; opacity: .9; }
+        .nav-manage-link:hover { opacity: 1; color: #fff; }
+        .cart-link { margin-right: 12px; display: inline-flex; }
+        .btn-logout { background-color: #e5e7eb; color: #1a1a2e; border: none; }
+        .btn-logout:hover { background-color: #d1d5db; }
+        .icon { width: 20px; height: 20px; display: inline-block; vertical-align: middle; }
+        .icon-sm { width: 16px; height: 16px; }
+        .icon-lg { width: 26px; height: 26px; }
+        .icon-light { filter: brightness(0) invert(1); }
+        .icon-dark { filter: brightness(0); }
+        .icon-placeholder { width: 56px; height: 56px; filter: brightness(0); opacity: .25; }
+        .btn:hover .icon-hover-light, .btn:focus .icon-hover-light, .btn:active .icon-hover-light { filter: brightness(0) invert(1); }
+        .card-product { transition: transform 0.2s; }
+        .card-product:hover { transform: translateY(-5px); }
+        .low-stock { background-color: #fee2e2 !important; }
+        .price-discount { color: #e94560; font-weight: bold; }
+        .badge-many { background-color: #10b981; }
+        .badge-few { background-color: #f59e0b; }
+        .badge-none { background-color: #dc3545; }
+        .sidebar { background-color: white; padding: 20px; border-radius: 8px; height: calc(100vh - 100px); overflow-y: auto; position: sticky; top: 80px; scrollbar-width: thin; scrollbar-color: #1a1a2e #eef0f4; }
+        .sidebar::-webkit-scrollbar { width: 8px; }
+        .sidebar::-webkit-scrollbar-track { background: #eef0f4; border-radius: 8px; }
+        .sidebar::-webkit-scrollbar-thumb { background: #1a1a2e; border-radius: 8px; }
+        .sidebar::-webkit-scrollbar-thumb:hover { background: #e94560; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; letter-spacing: .2px; box-shadow: 0 1px 2px rgba(0,0,0,.15); white-space: nowrap; }
+        .status-new { background: #2563eb; color: #ffffff; }
+        .status-processing { background: #f59e0b; color: #1a1a2e; }
+        .status-shipped { background: #8b5cf6; color: #ffffff; }
+        .status-done { background: #10b981; color: #064e3b; }
+        .status-cancelled { background: #ef4444; color: #ffffff; }
+        .status-default { background: #64748b; color: #ffffff; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid px-4 nav-inner">
+            <div class="nav-left d-flex align-items-center">
+                <a class="navbar-brand d-flex align-items-center" href="{% url 'catalog:catalog' %}">
+                    <img src="{% static 'img/system/logo.svg' %}" alt="Логотип" class="brand-logo me-2">
+                    Магазин обуви
+                </a>
+                <span class="nav-divider">|</span>
+                <span class="nav-page-name" id="nav-page-name">Каталог</span>
+            </div>
+
+            <div class="nav-search">
+                <span class="text-white me-2">Поиск</span>
+                <form method="get" action="{% url 'catalog:catalog' %}" class="d-flex w-100">
+                    <input type="text" name="search" class="form-control search-input" placeholder="Ввод..." value="{{ request.GET.search }}">
+                </form>
+            </div>
+
+            {% if user.is_authenticated %}
+            <div class="nav-right d-flex align-items-center">
+                <a href="{% url 'users:profile' %}" class="user-name text-decoration-none d-inline-flex align-items-center">
+                    <img src="{% static 'img/system/icon/svg/circle-user.svg' %}" alt="" class="icon icon-sm icon-light me-2">
+                    {{ user.full_name }}
+                </a>
+                {% if user.role %}
+                    {% if user.role.name == "Администратор" %}
+                        <span class="role-badge role-admin">{{ user.role.name }}</span>
+                    {% elif user.role.name == "Менеджер" %}
+                        <span class="role-badge role-manager">{{ user.role.name }}</span>
+                    {% else %}
+                        <span class="role-badge role-buyer">{{ user.role.name }}</span>
+                    {% endif %}
+                {% endif %}
+                {% if user.is_staff or user.is_admin or user.is_superuser or user.role.name == "Менеджер" or user.role.name == "Администратор" %}
+                <a href="{% url 'orders:manager_order_list' %}" class="nav-manage-link d-inline-flex align-items-center gap-2" title="Управление заказами">
+                    <img src="{% static 'img/system/icon/svg/square-chart-gantt.svg' %}" alt="" class="icon icon-light">
+                    <span class="d-none d-xl-inline">Управление заказами</span>
+                </a>
+                {% endif %}
+                <a href="{% url 'orders:cart' %}" class="cart-link" title="Корзина">
+                    <img src="{% static 'img/system/icon/svg/shopping-basket.svg' %}" alt="Корзина" class="icon icon-lg icon-light">
+                </a>
+                <a href="{% url 'users:logout' %}" class="btn btn-logout btn-sm">Выход</a>
+            </div>
+            {% else %}
+            <div class="nav-right">
+                <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-sm">Войти</a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container mt-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="container-fluid mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        const navPage = document.getElementById('nav-page-name');
+        if (navPage) navPage.textContent = document.title;
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

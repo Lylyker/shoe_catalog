@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <img src="{% static 'img/system/icon/svg/user-plus-green.svg' %}" alt="" class="icon icon-lg icon-dark mb-2">
+                    <h3 class="card-title mb-0">Регистрация</h3>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="login" class="form-label">Логин: <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="login" name="login" required autofocus>
+                        <small class="form-text text-muted">Придумайте уникальный логин</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="full_name" class="form-label">ФИО: <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" required>
+                        <small class="form-text text-muted">Например: Иванов Иван Иванович</small>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success d-inline-flex align-items-center justify-content-center gap-2">
+                            <img src="{% static 'img/system/icon/svg/user-plus-white.svg' %}" alt="" class="icon icon-sm">
+                            Зарегистрироваться
+                        </button>
+                        <a href="{% url 'users:login' %}" class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2">
+                            <span aria-hidden="true">←</span>
+                            Уже есть аккаунт? Войти
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

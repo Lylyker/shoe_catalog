@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Вход в систему{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <img src="{% static 'img/system/icon/svg/circle-user.svg' %}" alt="" class="icon icon-lg icon-dark mb-2">
+                    <h3 class="card-title mb-0">Вход в систему</h3>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="login" class="form-label">Логин:</label>
+                        <input type="text" class="form-control" id="login" name="login" required autofocus>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Войти</button>
+                </form>
+                <hr>
+                <a href="{% url 'users:register' %}" class="btn btn-outline-success w-100 d-inline-flex align-items-center justify-content-center gap-2">
+                    <img src="{% static 'img/system/icon/svg/user-plus-green.svg' %}" alt="" class="icon icon-sm icon-hover-light">
+                    Регистрация
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

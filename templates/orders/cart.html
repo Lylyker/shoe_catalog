@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Корзина{% endblock %}
+
+{% block content %}
+<h2 class="d-flex align-items-center gap-2">
+    <img src="{% static 'img/system/icon/svg/shopping-cart.svg' %}" alt="" class="icon icon-lg icon-dark">
+    Корзина
+</h2>
+
+{% if basket and basket.items.all %}
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Товар</th><th>Размер</th><th>Цвет</th><th>Количество</th><th>Цена</th><th>Сумма</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in basket.items.all %}
+        <tr>
+            <td>{{ item.product_variant.product.name }}</td>
+            <td>{{ item.product_variant.size }}</td>
+            <td>{{ item.product_variant.color }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.price_addition }} ₽</td>
+            <td><strong>{{ item.get_subtotal }} ₽</strong></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="5" class="text-end"><strong>Итого:</strong></td>
+            <td><strong>{{ basket.get_total_price }} ₽</strong></td>
+        </tr>
+    </tfoot>
+</table>
+
+<div class="d-flex justify-content-between">
+    <a href="{% url 'catalog:catalog' %}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+        <span aria-hidden="true">←</span>
+        Продолжить покупки
+    </a>
+    <a href="{% url 'orders:order_create' %}" class="btn btn-primary btn-lg">Оформить заказ</a>
+</div>
+{% else %}
+<div class="alert alert-info">Корзина пуста</div>
+<a href="{% url 'catalog:catalog' %}" class="btn btn-primary">Перейти в каталог</a>
+{% endif %}
+{% endblock %}

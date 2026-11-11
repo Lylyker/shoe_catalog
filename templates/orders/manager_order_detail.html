@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Заказ #{{ order.id }} — управление{% endblock %}
+
+{% block content %}
+<a href="{% url 'orders:manager_order_list' %}" class="btn btn-outline-secondary mb-3 d-inline-flex align-items-center gap-2">
+    <span aria-hidden="true">←</span> Назад к списку
+</a>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <span class="d-flex align-items-center gap-2">
+            <img src="{% static 'img/system/icon/svg/square-chart-gantt.svg' %}" alt="" class="icon icon-light">
+            <h5 class="mb-0">Заказ #{{ order.id }}</h5>
+        </span>
+        {% include 'orders/_status_badge.html' with status=order.status %}
+    </div>
+    <div class="card-body">
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="text-muted small">Клиент</div>
+                <strong>{{ order.user.full_name }}</strong>
+                <div class="text-muted small">{{ order.user.phone }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-muted small">Дата оформления</div>
+                <strong>{{ order.date_issue|date:"d.m.Y" }}</strong>
+            </div>
+            <div class="col-md-3">
+                <div class="text-muted small">Способ доставки</div>
+                <strong>{{ order.delivery_method }}</strong>
+            </div>
+            <div class="col-md-2">
+                <div class="text-muted small">Позиций</div>
+                <strong>{{ items|length }}</strong>
+            </div>
+        </div>
+
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Товар</th><th>Размер</th><th>Цвет</th><th>Кол-во</th><th>Цена</th><th>Сумма</th>
+                    {% if can_delete %}<th>Действие</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.product_variant.product.name }}</td>
+                    <td>{{ item.product_variant.size }}</td>
+                    <td>{{ item.product_variant.color }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.price_order }} ₽</td>
+                    <td><strong>{{ item.get_subtotal }} ₽</strong></td>
+                    {% if can_delete %}
+                    <td>
+                        <form method="post" action="{% url 'orders:order_item_delete' item.pk %}"
+                              onsubmit="return confirm('Удалить позицию «{{ item.product_variant.product.name }}» из заказа? Остаток будет возвращён на склад.');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-4">В заказе нет позиций</td></tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" class="text-end"><strong>Итого:</strong></td>
+                    <td><strong>{{ total }} ₽</strong></td>
+                    {% if can_delete %}<td></td>{% endif %}
+                </tr>
+            </tfoot>
+        </table>
+
+        {% if not can_delete %}
+        <div class="alert alert-info mb-0">Удаление позиций доступно только Администратору.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

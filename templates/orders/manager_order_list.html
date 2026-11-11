@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Управление заказами{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h2 class="d-flex align-items-center gap-2 mb-0">
+        <img src="{% static 'img/system/icon/svg/square-chart-gantt.svg' %}" alt="" class="icon icon-lg icon-dark">
+        Управление заказами
+    </h2>
+    <div class="d-flex gap-4 text-muted">
+        <span>Всего заказов: <strong class="text-dark">{{ total_orders }}</strong></span>
+        <span>Общая сумма: <strong class="text-dark">{{ total_sum }} ₽</strong></span>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-3">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-auto">
+                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">Все статусы</option>
+                    {% for s in statuses %}
+                        <option value="{{ s.id }}" {% if request.GET.status == s.id|stringformat:"d" %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <input type="text" name="q" class="form-control form-control-sm" placeholder="Поиск по ФИО клиента..." value="{{ request.GET.q }}">
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary btn-sm" type="submit">Найти</button>
+                <a href="{% url 'orders:manager_order_list' %}" class="btn btn-outline-secondary btn-sm">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <span class="d-flex align-items-center gap-2">
+            <img src="{% static 'img/system/icon/svg/square-chart-gantt.svg' %}" alt="" class="icon icon-light">
+            <h5 class="mb-0">Заказы</h5>
+        </span>
+        <span class="badge bg-light text-dark">{{ orders|length }}</span>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-striped table-hover align-middle mb-0">
+            <thead>
+                <tr><th>№</th><th>Дата</th><th>Клиент</th><th>Статус</th><th>Сумма</th><th>Действия</th></tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>#{{ order.id }}</td>
+                    <td>{{ order.date_issue|date:"d.m.Y" }}</td>
+                    <td>{{ order.user.full_name }}</td>
+                    <td>{% include 'orders/_status_badge.html' with status=order.status %}</td>
+                    <td><strong>{{ order.get_total_price }} ₽</strong></td>
+                    <td><a href="{% url 'orders:manager_order_detail' order.pk %}" class="btn btn-sm btn-primary">Просмотр</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-4">Заказы не найдены</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

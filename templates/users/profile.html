@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white d-flex align-items-center gap-2">
+                <img src="{% static 'img/system/icon/svg/circle-user.svg' %}" alt="" class="icon icon-light">
+                <h5 class="mb-0">Мои данные</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Логин:</label>
+                        <input type="text" class="form-control" value="{{ user.login }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="full_name" class="form-label">ФИО:</label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" value="{{ user.full_name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Телефон:</label>
+                        <input type="text" class="form-control" id="phone" name="phone" value="{{ user.phone }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="delivery_address" class="form-label">Адрес доставки:</label>
+                        <textarea class="form-control" id="delivery_address" name="delivery_address" rows="3">{{ user.delivery_address }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Сохранить изменения</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white d-flex align-items-center gap-2">
+                <img src="{% static 'img/system/icon/svg/square-chart-gantt.svg' %}" alt="" class="icon icon-light">
+                <h5 class="mb-0">Мои заказы</h5>
+            </div>
+            <div class="card-body">
+                {% if orders %}
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr><th>№</th><th>Дата</th><th>Статус</th><th>Сумма</th><th>Действие</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>#{{ order.id }}</td>
+                            <td>{{ order.date_issue|date:"d.m.Y" }}</td>
+                            <td>{% include 'orders/_status_badge.html' with status=order.status %}</td>
+                            <td>{{ order.get_total_price }} ₽</td>
+                            <td><a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-sm btn-outline-primary">Просмотр</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="alert alert-info mb-0">У вас пока нет заказов</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span class="d-flex align-items-center gap-2">
+                    <img src="{% static 'img/system/icon/svg/shopping-basket.svg' %}" alt="" class="icon icon-light">
+                    <h5 class="mb-0">Корзина</h5>
+                </span>
+                {% if basket %}
+                    <span class="badge bg-light text-dark">{{ basket.items.count }} поз.</span>
+                {% else %}
+                    <span class="badge bg-light text-dark">0 поз.</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if basket and basket.items.all %}
+                <table class="table table-sm table-striped align-middle">
+                    <thead>
+                        <tr><th>Товар</th><th>Размер</th><th>Цвет</th><th>Кол-во</th><th>Сумма</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for item in basket.items.all %}
+                        <tr>
+                            <td>{{ item.product_variant.product.name }}</td>
+                            <td>{{ item.product_variant.size }}</td>
+                            <td>{{ item.product_variant.color }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td><strong>{{ item.get_subtotal }} ₽</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4" class="text-end"><strong>Итого:</strong></td>
+                            <td><strong>{{ basket.get_total_price }} ₽</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'orders:cart' %}" class="btn btn-outline-secondary">Открыть корзину</a>
+                    <a href="{% url 'orders:order_create' %}" class="btn btn-success">Оформить заказ</a>
+                </div>
+                {% else %}
+                <div class="alert alert-info">Корзина пуста</div>
+                <a href="{% url 'catalog:catalog' %}" class="btn btn-primary">Перейти в каталог</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
