@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
+    'core.apps.CoreConfig',
     'catalog',
     'orders',
     'users',
@@ -72,8 +73,6 @@ STORAGES = {
     },
 }
 
-DEFAULT_FILE_STORAGE = 'shoe_catalog.storage.SafeFileSystemStorage'
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -106,6 +105,8 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 AUTH_USER_MODEL = 'users.User'
+
+REQUIRE_PASSWORD = True
 
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'catalog:catalog'

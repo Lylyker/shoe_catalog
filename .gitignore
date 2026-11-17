@@ -6,3 +6,5 @@ __pycache__/
 .idea/
 .env
 *.log
+.venv312/
+*.bak

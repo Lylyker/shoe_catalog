@@ -1,0 +1,10 @@
+#!/bin/sh
+PY=python
+[ -x .venv312/bin/python ] && PY=.venv312/bin/python
+[ -x myvenv/bin/python ] && PY=myvenv/bin/python
+"$PY" manage.py check_encoding --quiet || {
+  echo ""
+  echo "Коммит отклонён: обнаружены проблемы кодировки в исходниках."
+  echo "Запусти: python manage.py check_encoding"
+  exit 1
+}

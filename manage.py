@@ -3,6 +3,19 @@
 import os
 import sys
 
+def ensure_utf8():
+    """Гарантирует UTF-8 режим файловой системы.
+
+    Если процесс запущен в локали C/POSIX, файловая система декодируется
+    как ASCII с surrogateescape — источник суррогатных символов.
+    В этом случае процесс один раз перезапускается в UTF-8 режиме.
+    """
+    enc = (sys.getfilesystemencoding() or '').lower().replace('-', '')
+    if enc != 'utf8' and os.environ.get('PYTHONUTF8') != '1':
+        os.environ['PYTHONUTF8'] = '1'
+        os.environ.setdefault('LANG', 'C.UTF-8')
+        os.environ.setdefault('LC_ALL', 'C.UTF-8')
+        os.execv(sys.executable, [sys.executable] + sys.argv)
 
 def main():
     """Run administrative tasks."""
@@ -19,4 +32,5 @@ def main():
 
 
 if __name__ == '__main__':
+    ensure_utf8()
     main()
