@@ -105,6 +105,11 @@ class User(AbstractBaseUser):
     )
     phone = models.CharField(max_length=20, blank=True, verbose_name="Телефон")
     delivery_address = models.TextField(blank=True, verbose_name="Адрес доставки")
+    email = models.EmailField(blank=True, verbose_name="E-mail")
+    must_change_password = models.BooleanField(
+        default=False,
+        verbose_name="Требуется смена пароля"
+    )
 
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     is_admin = models.BooleanField(default=False, verbose_name="Администратор (роль)")
