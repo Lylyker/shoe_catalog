@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'catalog',
     'orders',
     'users',
+    'supply.apps.SupplyConfig',
 ]
 
 MIDDLEWARE = [

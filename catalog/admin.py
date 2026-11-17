@@ -103,3 +103,11 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = ('product', 'user', 'rating', 'date_created')
     list_filter = ('rating',)
     search_fields = ('product__name', 'user__full_name')
+
+@admin.register(ProductVariant)
+class ProductVariantAdmin(admin.ModelAdmin):
+    list_display = ('product', 'size', 'color', 'quantity')
+    list_filter = ('size', 'color', 'product__category')
+    search_fields = ('product__name', 'product__brand__name', 'size__name', 'color__name')
+    list_select_related = ('product', 'size', 'color')
+    ordering = ('product', 'size', 'color')
