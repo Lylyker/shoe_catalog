@@ -1,126 +1,105 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static dash %}
 {% block title %}Личный кабинет{% endblock %}
-
+{% block navname %}Личный кабинет{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col-md-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-dark text-white d-flex align-items-center gap-2">
-                <img src="{% static 'img/system/icon/svg/circle-user.svg' %}" alt="" class="icon icon-light">
-                <h5 class="mb-0">Мои данные</h5>
-            </div>
-            <div class="card-body">
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Логин:</label>
-                        <input type="text" class="form-control" value="{{ user.login }}" disabled>
-                    </div>
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}:</label>
-                            {{ field }}
-                            {% for e in field.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
-                        </div>
-                    {% endfor %}
-                    <button type="submit" class="btn btn-primary w-100">Сохранить изменения</button>
-                </form>
-            </div>
-        </div>
+<div class="container" style="padding-block:1.1rem">
+  <div class="page-head">
+    <h1>Личный кабинет</h1>
+    <div class="row">
+      <span class="chip">{{ user.login }}</span>
+      {% if user.role %}<span class="chip">{{ user.role }}</span>{% endif %}
+      <a class="btn btn-sm" href="{% url 'catalog:catalog' %}">В каталог</a>
+    </div>
+  </div>
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0">Безопасность</h5>
-            </div>
-            <div class="card-body">
-                <p class="text-muted small mb-3">
-                    Регулярно меняйте пароль и не передавайте его третьим лицам.
-                </p>
-                {% if user.must_change_password %}
-                    <div class="alert alert-warning small">Требуется сменить временный пароль.</div>
-                {% endif %}
-                <a href="{% url 'users:password_change' %}" class="btn btn-outline-primary w-100">Сменить пароль</a>
-            </div>
+  <div class="grid grid-2">
+    <div class="col">
+      <div class="card-x">
+        <div class="head">
+          <h2><img src="{% static 'img/system/icon/svg/circle-user.svg' %}" alt="" class="icon icon-sm icon-light"> Мои данные</h2>
         </div>
+        <div class="body">
+          <form method="post" novalidate class="col">
+            {% csrf_token %}
+            <div class="field">
+              <label class="form-label">Логин</label>
+              <input class="form-control" value="{{ user.login }}" disabled>
+            </div>
+            {% for field in form %}
+              <div class="field">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% for e in field.errors %}<div class="err">{{ e }}</div>{% endfor %}
+              </div>
+            {% endfor %}
+            <button class="btn btn-primary" type="submit">Сохранить изменения</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card-x">
+        <div class="head"><h2>Безопасность</h2></div>
+        <div class="body">
+          <p class="small muted">Регулярно меняйте пароль и не передавайте его третьим лицам.</p>
+          {% if user.must_change_password %}
+            <div class="alert alert-warning small">Требуется сменить временный пароль.</div>
+          {% endif %}
+          <a href="{% url 'users:password_change' %}" class="btn btn-outline-primary w-100">Сменить пароль</a>
+        </div>
+      </div>
     </div>
 
-    <div class="col-md-8">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-dark text-white d-flex align-items-center gap-2">
-                <img src="{% static 'img/system/icon/svg/square-chart-gantt.svg' %}" alt="" class="icon icon-light">
-                <h5 class="mb-0">Мои заказы</h5>
-            </div>
-            <div class="card-body">
-                {% if orders %}
-                <table class="table table-striped align-middle">
-                    <thead>
-                        <tr><th>№</th><th>Дата</th><th>Статус</th><th>Сумма</th><th>Действие</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for order in orders %}
-                        <tr>
-                            <td>#{{ order.id }}</td>
-                            <td>{{ order.date_issue|date:"d.m.Y" }}</td>
-                            <td>{% include 'orders/_status_badge.html' with status=order.status %}</td>
-                            <td>{{ order.get_total_price }} ₽</td>
-                            <td><a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-sm btn-outline-primary">Просмотр</a></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <div class="alert alert-info mb-0">У вас пока нет заказов</div>
-                {% endif %}
-            </div>
+    <div class="col">
+      <div class="card-x">
+        <div class="head">
+          <h2>Мои заказы</h2>
+          <a class="btn btn-sm" href="{% url 'orders:order_list' %}">Все заказы</a>
         </div>
+        <div class="table-wrap"><table class="tbl">
+          <thead><tr><th>№</th><th>Дата</th><th>Статус</th><th class="right">Сумма</th><th></th></tr></thead>
+          <tbody>
+          {% for o in orders %}
+            <tr>
+              <td>#{{ o.id }}</td>
+              <td>{{ o.date_issue|date:"d.m.Y" }}</td>
+              <td>{% include 'orders/_status_badge.html' with status=o.status %}</td>
+              <td class="right bold">{{ o.get_total_price|money }} ₽</td>
+              <td><a class="btn btn-sm" href="{% url 'orders:order_detail' o.pk %}">Просмотр</a></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="empty">Заказов пока нет</td></tr>
+          {% endfor %}
+          </tbody>
+        </table></div>
+      </div>
 
-        <div class="card shadow-sm">
-            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                <span class="d-flex align-items-center gap-2">
-                    <img src="{% static 'img/system/icon/svg/shopping-basket.svg' %}" alt="" class="icon icon-light">
-                    <h5 class="mb-0">Корзина</h5>
-                </span>
-                {% if basket %}
-                    <span class="badge bg-light text-dark">{{ basket.items.count }} поз.</span>
-                {% else %}
-                    <span class="badge bg-light text-dark">0 поз.</span>
-                {% endif %}
-            </div>
-            <div class="card-body">
-                {% if basket and basket.items.all %}
-                <table class="table table-sm table-striped align-middle">
-                    <thead>
-                        <tr><th>Товар</th><th>Размер</th><th>Цвет</th><th>Кол-во</th><th>Сумма</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for item in basket.items.all %}
-                        <tr>
-                            <td>{{ item.product_variant.product.name }}</td>
-                            <td>{{ item.product_variant.size }}</td>
-                            <td>{{ item.product_variant.color }}</td>
-                            <td>{{ item.quantity }}</td>
-                            <td><strong>{{ item.get_subtotal }} ₽</strong></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="4" class="text-end"><strong>Итого:</strong></td>
-                            <td><strong>{{ basket.get_total_price }} ₽</strong></td>
-                        </tr>
-                    </tfoot>
-                </table>
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'orders:cart' %}" class="btn btn-outline-secondary">Открыть корзину</a>
-                    <a href="{% url 'orders:order_create' %}" class="btn btn-success">Оформить заказ</a>
-                </div>
-                {% else %}
-                <div class="alert alert-info">Корзина пуста</div>
-                <a href="{% url 'catalog:catalog' %}" class="btn btn-primary">Перейти в каталог</a>
-                {% endif %}
-            </div>
+      <div class="card-x">
+        <div class="head">
+          <h2><img src="{% static 'img/system/icon/svg/shopping-basket.svg' %}" alt="" class="icon icon-sm icon-light"> Корзина</h2>
+          <span class="badge">{{ basket.items.count|default:0 }} поз.</span>
         </div>
+        <div class="body">
+          {% if basket and basket.items.exists %}
+            <div class="table-wrap"><table class="tbl">
+              <thead><tr><th>Товар</th><th>Кол-во</th><th class="right">Сумма</th></tr></thead>
+              <tbody>
+              {% for item in basket.items.all %}
+                <tr><td class="wrap">{{ item.product_variant }}</td><td>{{ item.quantity }}</td>
+                    <td class="right">{{ item.get_subtotal|money }} ₽</td></tr>
+              {% endfor %}
+              </tbody>
+              <tfoot><tr><td colspan="2" class="right">Итого</td>
+                <td class="right">{{ basket.get_total_price|money }} ₽</td></tr></tfoot>
+            </table></div>
+            <a href="{% url 'orders:cart' %}" class="btn btn-primary w-100 mt">Открыть корзину</a>
+          {% else %}
+            <div class="alert alert-info">Корзина пуста</div>
+            <a href="{% url 'catalog:catalog' %}" class="btn btn-primary w-100">Перейти в каталог</a>
+          {% endif %}
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

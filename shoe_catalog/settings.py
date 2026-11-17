@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'orders',
     'users',
     'supply.apps.SupplyConfig',
+    'dashboard.apps.DashboardConfig',
 ]
 
 MIDDLEWARE = [

@@ -1,298 +1,205 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static dash %}
 {% block title %}{{ product.name }}{% endblock %}
-
+{% block navname %}{{ product.name }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-center">
-    <div class="d-flex flex-column" style="width: fit-content; max-width: 100%;">
+<div class="container" style="padding-block:1.1rem">
+  <a href="{% url 'catalog:catalog' %}" class="btn mb">← Назад в каталог</a>
 
-        <a href="{% url 'catalog:catalog' %}" class="btn btn-outline-secondary align-self-start mb-3 d-inline-flex align-items-center gap-2">
-            <span aria-hidden="true">←</span>
-            Назад в каталог
-        </a>
-
-        <!-- ===== Карточка товара ===== -->
-        <div class="card shadow-sm border-0" style="width: fit-content; max-width: 100%; height: auto;">
-            <div class="card-body p-4">
-                <div class="d-flex flex-wrap justify-content-center align-items-start gap-4">
-
-                    <div style="width: 480px; max-width: 100%;">
-                        <div class="rounded bg-light d-flex align-items-center justify-content-center overflow-hidden mb-3" style="width: 100%; height: 360px;">
-                            {% if product.photo %}
-                                <img src="{{ product.photo.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: contain;">
-                            {% else %}
-                                <img src="{% static 'img/system/icon/svg/image-off.svg' %}" alt="Изображение отсутствует" class="icon-placeholder" style="width: 80px; height: 80px;">
-                            {% endif %}
-                        </div>
-
-                        <h5 class="mb-2">Характеристики:</h5>
-                        <table class="table table-sm table-borderless mb-0">
-                            <tbody>
-                                <tr><td class="text-muted" style="width: 45%;">Категория:</td><td>{{ product.category }}</td></tr>
-                                <tr><td class="text-muted">Бренд:</td><td>{{ product.brand }}</td></tr>
-                                <tr><td class="text-muted">Сезон:</td><td>{{ product.season }}</td></tr>
-                                <tr><td class="text-muted">Стиль:</td><td>{{ product.style }}</td></tr>
-                                <tr><td class="text-muted">Целевая группа:</td><td>{{ product.target_group }}</td></tr>
-                                <tr>
-                                    <td class="text-muted">Страна производства:</td>
-                                    <td>{% if product.country_origin %}{{ product.country_origin }}{% else %}<span class="badge bg-secondary">Отсутствует</span>{% endif %}</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Особенности:</td>
-                                    <td>{% if product.special_properties %}{{ product.special_properties }}{% else %}<span class="badge bg-secondary">Отсутствует</span>{% endif %}</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Материалы:</td>
-                                    <td>
-                                        {% if product.materials.all %}
-                                            {% for mp in product.materials.all %}{{ mp.material }} ({{ mp.detail }}){% if not forloop.last %}, {% endif %}{% endfor %}
-                                        {% else %}
-                                            <span class="badge bg-secondary">Отсутствует</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div style="width: 420px; max-width: 100%;">
-                        <h1 class="mb-2">{{ product.name }}</h1>
-                        <p class="text-muted">{{ product.brand }} | {{ product.category }} | {{ product.season }} | {{ product.style }}</p>
-
-                        <h3 class="my-3">
-                            {% with price=product.get_discounted_price %}
-                                {% if price != product.retail_price %}
-                                    <span class="text-decoration-line-through text-muted">{{ product.retail_price }} ₽</span>
-                                    <span class="price-discount ms-2">{{ price|floatformat:2 }} ₽</span>
-                                {% else %}
-                                    {{ product.retail_price }} ₽
-                                {% endif %}
-                            {% endwith %}
-                        </h3>
-
-                        <p class="mb-4">
-                            {% if product.description %}{{ product.description }}{% else %}<span class="text-muted">Описание отсутствует.</span>{% endif %}
-                        </p>
-
-                        <h5>Доступные варианты:</h5>
-                        <form method="post" action="{% url 'orders:cart' %}">
-                            {% csrf_token %}
-                            <div class="mb-2">
-                                <label class="form-label" for="variant-select">Размер и цвет:</label>
-                                <select name="variant_id" id="variant-select" class="form-select" required>
-                                    {% for variant in variants %}
-                                        <option value="{{ variant.id }}" data-stock="{{ variant.quantity }}" {% if variant.quantity == 0 %}disabled{% endif %}>
-                                            Размер {{ variant.size }} | {{ variant.color }} | Остаток: {{ variant.quantity }} шт.
-                                            {% if variant.quantity == 0 %}(Нет в наличии){% elif variant.quantity <= 3 %}(Мало){% endif %}
-                                        </option>
-                                    {% empty %}
-                                        <option disabled selected>(Отсутствует)</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <div class="mb-3" id="stock-info"></div>
-
-                            <div class="mb-3">
-                                <label class="form-label" for="quantity-input">Количество:</label>
-                                <input type="number" name="quantity" id="quantity-input" class="form-control" value="1" min="1" max="1" style="width: 120px;">
-                            </div>
-
-                            <button type="submit" id="add-to-cart-btn" class="btn btn-primary btn-lg w-100 d-inline-flex align-items-center justify-content-center gap-2">
-                                <img src="{% static 'img/system/icon/svg/shopping-cart-plus.svg' %}" alt="" class="icon icon-light">
-                                Добавить в корзину
-                            </button>
-                        </form>
-                    </div>
-
-                </div>
-            </div>
+  <div class="card-x mb">
+    <div class="body">
+      <div class="detail-grid">
+        <div class="col">
+          <div class="detail-photo">
+            {% if product.photo %}
+              <img src="{{ product.photo.url }}" alt="{{ product.name }}">
+            {% else %}
+              <img src="{% static 'img/system/icon/svg/image-off.svg' %}" alt="Нет изображения" class="icon-placeholder">
+            {% endif %}
+          </div>
+          <h2 style="font-size:1rem;margin-top:.9rem">Характеристики</h2>
+          <table class="spec">
+            <tr><td>Категория</td><td>{{ product.category }}</td></tr>
+            <tr><td>Бренд</td><td>{{ product.brand }}</td></tr>
+            <tr><td>Сезон</td><td>{{ product.season }}</td></tr>
+            <tr><td>Стиль</td><td>{{ product.style }}</td></tr>
+            <tr><td>Целевая группа</td><td>{{ product.target_group }}</td></tr>
+            <tr><td>Страна производства</td><td>{{ product.country_origin|default:'—' }}</td></tr>
+            <tr><td>Особенности</td><td>{{ product.special_properties|default:'—' }}</td></tr>
+            <tr><td>Материалы</td><td>{% for mp in product.materials.all %}{{ mp.material }} ({{ mp.detail }}){% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td></tr>
+          </table>
         </div>
 
-        <!-- ===== Карточка отзывов ===== -->
-        <div class="card shadow-sm border-0 mt-4 mb-5" id="reviews" style="width: 100%;">
-            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                <span class="d-flex align-items-center gap-2">
-                    <img src="{% static 'img/system/icon/svg/square-chart-gantt.svg' %}" alt="" class="icon icon-light">
-                    <h5 class="mb-0">Отзывы</h5>
-                </span>
-                <span class="badge bg-light text-dark">{{ comments_count }}</span>
+        <div class="col">
+          <h1>{{ product.name }}</h1>
+          <div class="row" style="gap:.35rem">
+            <span class="chip">{{ product.brand }}</span><span class="chip">{{ product.category }}</span>
+            <span class="chip">{{ product.season }}</span><span class="chip">{{ product.style }}</span>
+          </div>
+          {% with price=product.get_discounted_price %}
+            <div class="row" style="gap:.6rem;align-items:baseline">
+              <span class="price-now {% if price != product.retail_price %}price-discount{% endif %}">{{ price|money }} ₽</span>
+              {% if price != product.retail_price %}
+                <span class="muted text-decoration-line-through">{{ product.retail_price|money }} ₽</span>
+                <span class="badge badge-few">−25%</span>
+              {% endif %}
             </div>
-            <div class="card-body p-4">
+          {% endwith %}
+          <p class="muted">{{ product.description|default:'Описание отсутствует.' }}</p>
 
-                <!-- Сводка рейтинга -->
-                <div class="d-flex flex-wrap gap-4 align-items-center mb-4">
-                    <div class="text-center" style="min-width: 120px;">
-                        <div style="font-size: 2.6rem; font-weight: 700; line-height: 1;">{{ avg_rating }}</div>
-                        <div style="font-size: 1.2rem; letter-spacing: 2px;">
-                            {% for i in "12345" %}<span style="color: {% if forloop.counter <= avg_rating_rounded %}#f59e0b{% else %}#d1d5db{% endif %};">★</span>{% endfor %}
-                        </div>
-                        <div class="text-muted small">{{ comments_count }} отзывов</div>
-                    </div>
-                    <div class="flex-grow-1" style="min-width: 240px;">
-                        {% for d in rating_distribution %}
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="text-muted small" style="width: 34px;">{{ d.stars }} ★</span>
-                            <div class="progress flex-grow-1" style="height: 8px;">
-                                <div class="progress-bar" role="progressbar" style="width: {{ d.percent|floatformat:0 }}%; background-color: #f59e0b;" aria-valuenow="{{ d.percent|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                            <span class="text-muted small" style="width: 24px;">{{ d.count }}</span>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <hr>
-
-                <!-- Список отзывов -->
-                {% if comments %}
-                    {% for comment in comments %}
-                    <div class="py-3 {% if not forloop.last %}border-bottom{% endif %}">
-                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                            <div class="d-flex align-items-center gap-2">
-                                <img src="{% static 'img/system/icon/svg/circle-user.svg' %}" alt="" class="icon icon-dark">
-                                <strong>{{ comment.user.full_name }}</strong>
-                                {% if comment.user.role %}
-                                    {% if comment.user.role.name == "Администратор" %}
-                                        <span class="role-badge role-admin">{{ comment.user.role.name }}</span>
-                                    {% elif comment.user.role.name == "Менеджер" %}
-                                        <span class="role-badge role-manager">{{ comment.user.role.name }}</span>
-                                    {% else %}
-                                        <span class="role-badge role-buyer">{{ comment.user.role.name }}</span>
-                                    {% endif %}
-                                {% endif %}
-                                {% if user.is_authenticated and comment.user_id == user.id %}
-                                    <span class="badge bg-primary">Ваш отзыв</span>
-                                {% endif %}
-                            </div>
-                            <span class="text-muted small">{{ comment.date_created|date:"d.m.Y H:i" }}</span>
-                        </div>
-                        <div class="my-1" style="letter-spacing: 2px;">
-                            {% for i in "12345" %}<span style="color: {% if forloop.counter <= comment.rating %}#f59e0b{% else %}#d1d5db{% endif %};">★</span>{% endfor %}
-                        </div>
-                        <p class="mb-0">{{ comment.description }}</p>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="alert alert-info mb-0">Отзывов пока нет. Будьте первым!</div>
-                {% endif %}
-
-                <hr>
-
-                <!-- Форма отзыва -->
-                {% if user.is_authenticated %}
-                    <h5 class="mb-3">{% if user_comment %}Обновить свой отзыв{% else %}Оставить отзыв{% endif %}</h5>
-                    <form method="post" action="{{ request.path }}#reviews">
-                        {% csrf_token %}
-                        {% if comment_form.errors %}
-                            <div class="alert alert-danger">
-                                {% for field, errors in comment_form.errors.items %}
-                                    {% for error in errors %}<div>{{ error }}</div>{% endfor %}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        {{ comment_form.rating }}
-                        <div class="mb-2 d-flex align-items-center gap-3">
-                            <div id="star-picker" class="d-flex gap-1" style="font-size: 1.7rem; line-height: 1; user-select: none;">
-                                <span class="star-pick" data-value="1" style="cursor: pointer; color: #d1d5db;">★</span>
-                                <span class="star-pick" data-value="2" style="cursor: pointer; color: #d1d5db;">★</span>
-                                <span class="star-pick" data-value="3" style="cursor: pointer; color: #d1d5db;">★</span>
-                                <span class="star-pick" data-value="4" style="cursor: pointer; color: #d1d5db;">★</span>
-                                <span class="star-pick" data-value="5" style="cursor: pointer; color: #d1d5db;">★</span>
-                            </div>
-                            <span class="text-muted" id="rating-label"></span>
-                        </div>
-                        <div class="mb-2">
-                            {{ comment_form.description }}
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <small class="text-muted" id="char-count">0 / 1000</small>
-                        </div>
-                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
-                            <img src="{% static 'img/system/icon/svg/message-square-plus.svg' %}" alt="" class="icon icon-sm icon-light">
-                            {% if user_comment %}Обновить отзыв{% else %}Оставить отзыв{% endif %}
-                        </button>
-                    </form>
-                {% else %}
-                    <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-2 mb-0">
-                        <span>Войдите в систему, чтобы оставить отзыв.</span>
-                        <a href="{% url 'users:login' %}" class="btn btn-primary btn-sm">Войти</a>
-                    </div>
-                {% endif %}
-
+          <form method="post" action="{% url 'orders:cart' %}" class="buy">
+            {% csrf_token %}
+            <div class="field">
+              <label class="form-label" for="variant-select">Размер и цвет</label>
+              <select name="variant_id" id="variant-select" class="form-select" required>
+                {% for v in variants %}
+                  <option value="{{ v.id }}" data-stock="{{ v.quantity }}">
+                    Размер {{ v.size }} | {{ v.color }} | остаток {{ v.quantity }} шт.
+                  </option>
+                {% empty %}<option disabled selected>Нет доступных вариантов</option>{% endfor %}
+              </select>
             </div>
+            <div id="stock-info"></div>
+            <div class="field">
+              <label class="form-label" for="quantity-input">Количество</label>
+              <input type="number" name="quantity" id="quantity-input" class="form-control"
+                     value="1" min="1" max="1" style="max-width:8rem">
+            </div>
+            <button type="submit" id="add-to-cart-btn" class="btn btn-primary">
+              <img src="{% static 'img/system/icon/svg/shopping-cart-plus.svg' %}" alt="" class="icon icon-sm icon-light">
+              Добавить в корзину
+            </button>
+          </form>
         </div>
-
+      </div>
     </div>
+  </div>
+
+  <div class="card-x" id="reviews">
+    <div class="head">
+      <h2><img src="{% static 'img/system/icon/svg/square-chart-gantt.svg' %}" alt="" class="icon icon-sm icon-light"> Отзывы</h2>
+      <span class="badge">{{ comments_count }}</span>
+    </div>
+    <div class="body">
+      <div class="row mb" style="gap:1.4rem;align-items:center">
+        <div class="text-center" style="min-width:7rem">
+          <div class="rating-big">{{ avg_rating }}</div>
+          <div class="stars">{% for i in "12345" %}<span style="color:{% if forloop.counter <= avg_rating_rounded %}#f59e0b{% else %}#d1d5db{% endif %}">★</span>{% endfor %}</div>
+          <div class="small muted">{{ comments_count }} отзывов</div>
+        </div>
+        <div class="col grow" style="gap:.25rem">
+          {% for d in rating_distribution %}
+            <div class="row" style="gap:.5rem">
+              <span class="small muted nowrap">{{ d.stars }} ★</span>
+              <div class="progress"><div class="progress-bar" style="width:{{ d.percent|floatformat:0 }}%"></div></div>
+              <span class="small muted">{{ d.count }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <hr>
+      {% for c in comments %}
+        <div class="review">
+          <div class="row-between">
+            <div class="row" style="gap:.4rem">
+              <img src="{% static 'img/system/icon/svg/circle-user.svg' %}" alt="" class="icon icon-sm icon-dark">
+              <strong>{{ c.user.full_name }}</strong>
+              {% if c.user.role %}<span class="chip">{{ c.user.role }}</span>{% endif %}
+              {% if user.is_authenticated and c.user_id == user.id %}<span class="badge badge-info">Ваш отзыв</span>{% endif %}
+            </div>
+            <span class="small muted">{{ c.date_created|date:"d.m.Y H:i" }}</span>
+          </div>
+          <div class="stars" style="margin:.25rem 0">{% for i in "12345" %}<span style="color:{% if forloop.counter <= c.rating %}#f59e0b{% else %}#d1d5db{% endif %}">★</span>{% endfor %}</div>
+          <p style="margin:0">{{ c.description }}</p>
+        </div>
+      {% empty %}
+        <div class="alert alert-info">Отзывов пока нет. Будьте первым!</div>
+      {% endfor %}
+      <hr>
+      {% if user.is_authenticated %}
+        <h2 style="font-size:1rem">{% if user_comment %}Обновить свой отзыв{% else %}Оставить отзыв{% endif %}</h2>
+        <form method="post" action="{{ request.path }}#reviews" class="col">
+          {% csrf_token %}
+          {% if comment_form.errors %}
+            <div class="alert alert-error">{% for f, errs in comment_form.errors.items %}{% for e in errs %}<div>{{ e }}</div>{% endfor %}{% endfor %}</div>
+          {% endif %}
+          {{ comment_form.rating }}
+          <div class="row" style="gap:.8rem">
+            <div id="star-picker" class="row" style="gap:.15rem">
+              <span class="star-pick" data-value="1">★</span><span class="star-pick" data-value="2">★</span>
+              <span class="star-pick" data-value="3">★</span><span class="star-pick" data-value="4">★</span>
+              <span class="star-pick" data-value="5">★</span>
+            </div>
+            <span class="muted small" id="rating-label"></span>
+          </div>
+          {{ comment_form.description }}
+          <div class="row-between">
+            <small class="muted" id="char-count">0 / 1000</small>
+            <button type="submit" class="btn btn-primary">
+              <img src="{% static 'img/system/icon/svg/message-square-plus.svg' %}" alt="" class="icon icon-sm icon-light">
+              {% if user_comment %}Обновить отзыв{% else %}Оставить отзыв{% endif %}
+            </button>
+          </div>
+        </form>
+      {% else %}
+        <div class="alert alert-info row-between">
+          <span>Войдите в систему, чтобы оставить отзыв.</span>
+          <a href="{% url 'users:login' %}" class="btn btn-sm btn-primary">Войти</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 
 <script>
 (function () {
-    const select = document.getElementById('variant-select');
-    const qty = document.getElementById('quantity-input');
-    const stockInfo = document.getElementById('stock-info');
-    const submitBtn = document.getElementById('add-to-cart-btn');
-    if (select) {
-        function update() {
-            const opt = select.selectedOptions[0];
-            const stock = opt ? parseInt(opt.dataset.stock || '0', 10) : 0;
-            if (stock > 0) {
-                qty.disabled = false;
-                submitBtn.disabled = false;
-                qty.max = stock;
-                if (parseInt(qty.value || '1', 10) > stock) qty.value = stock;
-                stockInfo.innerHTML = stock <= 3
-                    ? '<span class="badge badge-few">Мало</span> В наличии: ' + stock + ' шт.'
-                    : '<span class="badge badge-many">Много</span> В наличии: ' + stock + ' шт.';
-            } else {
-                qty.disabled = true;
-                submitBtn.disabled = true;
-                stockInfo.innerHTML = '<span class="badge badge-none">Нет в наличии</span>';
-            }
-        }
-        select.addEventListener('change', update);
-        qty.addEventListener('input', function () {
-            const max = parseInt(qty.max || '1', 10);
-            let v = parseInt(qty.value || '1', 10);
-            if (isNaN(v) || v < 1) v = 1;
-            if (v > max) v = max;
-            qty.value = v;
-        });
-        update();
+  var sel = document.getElementById('variant-select'),
+      qty = document.getElementById('quantity-input'),
+      info = document.getElementById('stock-info'),
+      btn = document.getElementById('add-to-cart-btn');
+  function sync() {
+    var opt = sel && sel.selectedOptions[0];
+    var stock = opt ? parseInt(opt.dataset.stock || '0', 10) : 0;
+    if (stock > 0) {
+      qty.disabled = false; btn.disabled = false; qty.max = stock;
+      if (parseInt(qty.value || '1', 10) > stock) qty.value = stock;
+      info.innerHTML = stock <= 3
+        ? '<span class="badge badge-few">Мало</span> <span class="small muted">в наличии ' + stock + ' шт.</span>'
+        : '<span class="badge badge-many">Много</span> <span class="small muted">в наличии ' + stock + ' шт.</span>';
+    } else {
+      qty.disabled = true; btn.disabled = true;
+      info.innerHTML = '<span class="badge badge-none">Нет в наличии</span>';
     }
-
-    // Интерактивный выбор оценки звёздами
-    const picker = document.getElementById('star-picker');
-    if (picker) {
-        const input = document.getElementById('rating-input');
-        const label = document.getElementById('rating-label');
-        const stars = picker.querySelectorAll('.star-pick');
-        const texts = {1: 'Ужасно', 2: 'Плохо', 3: 'Нормально', 4: 'Хорошо', 5: 'Отлично'};
-        let current = parseInt(input.value || '5', 10);
-        function paint(v) {
-            stars.forEach(s => { s.style.color = (+s.dataset.value <= v) ? '#f59e0b' : '#d1d5db'; });
-        }
-        function setLabel(v) { label.textContent = v + ' — ' + texts[v]; }
-        paint(current); setLabel(current);
-        stars.forEach(s => {
-            s.addEventListener('mouseenter', () => paint(+s.dataset.value));
-            s.addEventListener('click', () => {
-                current = +s.dataset.value;
-                input.value = current;
-                paint(current); setLabel(current);
-            });
-        });
-        picker.addEventListener('mouseleave', () => paint(current));
-    }
-
-    // Счётчик символов отзыва
-    const ta = document.getElementById('review-text');
-    const cnt = document.getElementById('char-count');
-    if (ta && cnt) {
-        const upd = () => { cnt.textContent = ta.value.length + ' / 1000'; };
-        ta.addEventListener('input', upd);
-        upd();
-    }
+  }
+  if (sel) {
+    sel.addEventListener('change', sync);
+    qty.addEventListener('input', function () {
+      var max = parseInt(qty.max || '1', 10), v = parseInt(qty.value || '1', 10);
+      qty.value = Math.min(Math.max(isNaN(v) ? 1 : v, 1), max);
+    });
+    sync();
+  }
+  var picker = document.getElementById('star-picker');
+  if (picker) {
+    var input = document.getElementById('rating-input'),
+        label = document.getElementById('rating-label'),
+        stars = picker.querySelectorAll('.star-pick'),
+        texts = {1:'Ужасно',2:'Плохо',3:'Нормально',4:'Хорошо',5:'Отлично'},
+        cur = parseInt(input.value || '5', 10);
+    function paint(v) { stars.forEach(function (s) { s.style.color = (+s.dataset.value <= v) ? '#f59e0b' : '#d1d5db'; }); }
+    function say(v) { label.textContent = v + ' — ' + texts[v]; }
+    paint(cur); say(cur);
+    stars.forEach(function (s) {
+      s.addEventListener('mouseenter', function () { paint(+s.dataset.value); });
+      s.addEventListener('click', function () { cur = +s.dataset.value; input.value = cur; paint(cur); say(cur); });
+    });
+    picker.addEventListener('mouseleave', function () { paint(cur); });
+  }
+  var ta = document.getElementById('review-text'), cnt = document.getElementById('char-count');
+  if (ta && cnt) {
+    var upd = function () { cnt.textContent = ta.value.length + ' / 1000'; };
+    ta.addEventListener('input', upd); upd();
+  }
 })();
 </script>
 {% endblock %}
