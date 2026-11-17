@@ -1,0 +1,20 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Удаление — {{ cfg.title }}{% endblock %}
+{% block panel %}
+<a class="btn mb" href="{% url 'dashboard:list' cfg.slug %}">← К списку</a>
+<div class="card-x" style="max-width:44rem">
+  <div class="head"><h2>Подтверждение удаления</h2></div>
+  <div class="body">
+    <div class="alert alert-warning">
+      Запись <b>{{ obj }}</b> будет удалена без возможности восстановления.
+      {% if cfg.slug == 'orders' %}Остатки по всем позициям заказа вернутся на склады списания.{% endif %}
+      {% if cfg.slug == 'supplies' %}Удалять можно только черновики — проведённые поставки сначала отмените.{% endif %}
+    </div>
+    <form method="post" class="row">
+      {% csrf_token %}
+      <button class="btn btn-danger">Удалить</button>
+      <a class="btn" href="{% url 'dashboard:list' cfg.slug %}">Отмена</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

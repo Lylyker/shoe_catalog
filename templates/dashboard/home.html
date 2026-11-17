@@ -1,0 +1,73 @@
+{% extends 'dashboard/base.html' %}
+{% load static dash %}
+{% block title %}Сводка — панель управления{% endblock %}
+{% block panel %}
+<div class="row-between mb">
+  <h1>Сводка</h1>
+  <div class="row">
+    <a class="btn btn-primary" href="{% url 'dashboard:create' 'products' %}">＋ Товар</a>
+    <a class="btn btn-violet" href="{% url 'dashboard:create' 'supplies' %}">＋ Поставка</a>
+    <a class="btn" href="{% url 'dashboard:list' 'orders' %}">Заказы</a>
+  </div>
+</div>
+
+<div class="grid grid-auto mb">
+  {% for label, value, cls in stats %}
+    <div class="stat {{ cls }}"><div class="k">{{ label }}</div><div class="v">{{ value }}</div></div>
+  {% endfor %}
+</div>
+
+<div class="grid grid-2">
+  <div class="card-x">
+    <div class="head"><h2>Последние заказы</h2>
+      <a class="btn btn-sm" href="{% url 'dashboard:list' 'orders' %}">Все</a></div>
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr><th>№</th><th>Дата</th><th>Клиент</th><th>Статус</th><th class="right">Сумма</th></tr></thead>
+      <tbody>
+      {% for o in recent_orders %}
+        <tr>
+          <td><a href="{% url 'dashboard:detail' 'orders' o.pk %}">#{{ o.id }}</a></td>
+          <td>{{ o.date_issue|date:"d.m.Y" }}</td>
+          <td class="wrap">{{ o.user.full_name }}</td>
+          <td>{% include 'orders/_status_badge.html' with status=o.status %}</td>
+          <td class="right">{{ o.get_total_price|money }}</td>
+        </tr>
+      {% empty %}<tr><td colspan="5" class="empty">Заказов пока нет</td></tr>{% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="card-x">
+    <div class="head"><h2>Черновики поставок</h2>
+      <a class="btn btn-sm" href="{% url 'dashboard:list' 'supplies' %}">Все</a></div>
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr><th>Номер</th><th>Дата</th><th>Поставщик</th><th></th></tr></thead>
+      <tbody>
+      {% for s in drafts %}
+        <tr><td><a href="{% url 'dashboard:detail' 'supplies' s.pk %}">{{ s.number }}</a></td>
+          <td>{{ s.date_supply|date:"d.m.Y" }}</td><td class="wrap">{{ s.supplier }}</td>
+          <td><form method="post" action="{% url 'dashboard:supply-action' s.pk 'post' %}"
+                    data-confirm="Провести поставку {{ s.number }}? Остатки будут увеличены.">
+              {% csrf_token %}<button class="btn btn-sm btn-success">Провести</button></form></td></tr>
+      {% empty %}<tr><td colspan="4" class="empty">Черновиков нет</td></tr>{% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+</div>
+
+<div class="card-x mt">
+  <div class="head"><h2>Дефицит: остаток ≤ 3</h2>
+    <a class="btn btn-sm" href="{% url 'dashboard:list' 'stock' %}">Остатки</a></div>
+  <div class="table-wrap"><table class="tbl">
+    <thead><tr><th>Товар</th><th>Размер</th><th>Цвет</th><th class="right">Остаток</th><th>Наличие</th></tr></thead>
+    <tbody>
+    {% for v in low %}
+      <tr><td class="wrap">{{ v.product.name }}</td><td>{{ v.size }}</td><td>{{ v.color }}</td>
+        <td class="right bold">{{ v.quantity }}</td>
+        <td>{% if v.quantity == 0 %}<span class="badge badge-none">Нет в наличии</span>
+            {% else %}<span class="badge badge-few">Мало</span>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="5" class="empty">Дефицитных позиций нет</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</div>
+{% endblock %}

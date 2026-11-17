@@ -1,0 +1,56 @@
+{% extends 'dashboard/base.html' %}
+{% load static dash %}
+{% block title %}{% if create %}Добавление{% else %}Редактирование{% endif %} — {{ cfg.title }}{% endblock %}
+{% block panel %}
+<a class="btn mb" href="{% url 'dashboard:list' cfg.slug %}">← К списку</a>
+<div class="card-x">
+  <div class="head"><h2>{{ custom_title|default:cfg.title }} — {% if create %}новая запись{% else %}{{ obj }}{% endif %}</h2></div>
+  <div class="body">
+    <form method="post" {% if multipart %}enctype="multipart/form-data"{% endif %} novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="grid grid-form">
+        {% for field in form %}
+          <div class="field">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+            {{ field }}
+            {% if field.help_text %}<div class="hint">{{ field.help_text }}</div>{% endif %}
+            {% for e in field.errors %}<div class="err">{{ e }}</div>{% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+
+      {% for item in sets %}
+        <fieldset class="fs mt">
+          <legend>{{ item.title }}</legend>
+          {{ item.fs.management_form }}
+          {% if item.fs.non_form_errors %}<div class="alert alert-error">{{ item.fs.non_form_errors }}</div>{% endif %}
+          <div class="table-wrap"><table class="tbl">
+            <thead><tr>
+              {% for field in item.empty.visible_fields %}<th>{{ field.label }}</th>{% endfor %}
+              {% if item.fs.can_delete %}<th>Удалить</th>{% endif %}
+            </tr></thead>
+            <tbody>
+            {% for f in item.fs.forms %}
+              <tr>
+                {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+                {% for field in f.visible_fields %}
+                  <td>{{ field }}{% for e in field.errors %}<div class="err">{{ e }}</div>{% endfor %}</td>
+                {% endfor %}
+                {% if item.fs.can_delete %}<td>{% if f.instance.pk %}{{ f.DELETE }}{% endif %}</td>{% endif %}
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table></div>
+          <div class="hint mt">Заполните новые строки, чтобы добавить позиции. Пустые строки игнорируются.</div>
+        </fieldset>
+      {% endfor %}
+
+      <div class="row mt">
+        <button class="btn btn-primary" type="submit">{% if create %}Создать{% else %}Сохранить{% endif %}</button>
+        <a class="btn" href="{% url 'dashboard:list' cfg.slug %}">Отмена</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

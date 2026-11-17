@@ -1,0 +1,92 @@
+{% extends 'dashboard/base.html' %}
+{% load static dash %}
+{% block title %}{{ cfg.title }} — панель управления{% endblock %}
+{% block panel %}
+<div class="row-between mb">
+  <h1>{{ cfg.title }} <span class="badge">{{ total }}</span></h1>
+  {% if can_write %}<a class="btn btn-primary" href="{% url 'dashboard:create' cfg.slug %}">＋ Добавить</a>{% endif %}
+</div>
+
+<div class="card-x mb"><div class="body">
+  <form method="get" class="row">
+    {% if cfg.search %}
+      <input class="form-control grow" type="text" name="q" value="{{ term }}" placeholder="Поиск…">
+    {% endif %}
+    {% for f in filters %}
+      <select class="form-select" style="flex:0 1 12rem" name="{{ f.param }}">
+        <option value="">{{ f.label }}: все</option>
+        {% for val, label in f.choices %}
+          <option value="{{ val }}" {% if f.value == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    {% endfor %}
+    <select class="form-select" style="flex:0 1 13rem" name="sort">
+      <option value="">Сортировка: по умолчанию</option>
+      {% for key, label in columns %}
+        <option value="{{ key }}" {% if sort == key %}selected{% endif %}>{{ label }} ↑</option>
+        <option value="-{{ key }}" {% if sort == '-'|add:key %}selected{% endif %}>{{ label }} ↓</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-primary">Применить</button>
+    <a class="btn" href="{% url 'dashboard:list' cfg.slug %}">Сбросить</a>
+  </form>
+</div></div>
+
+<form method="post" action="{% url 'dashboard:bulk-delete' cfg.slug %}"
+      data-confirm="Удалить выбранные записи без возможности восстановления?">
+  {% csrf_token %}
+  <div class="card-x">
+    <div class="head">
+      <h2>Записи</h2>
+      {% if can_write and not cfg.readonly %}
+        <button class="btn btn-sm btn-danger" type="submit">Удалить выбранные</button>
+      {% endif %}
+    </div>
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr>
+        {% if can_write %}<th><input type="checkbox" class="form-check-input" id="check-all" aria-label="Выбрать все"></th>{% endif %}
+        {% for key, label in columns %}<th>{{ label }}</th>{% endfor %}
+        <th>Действия</th>
+      </tr></thead>
+      <tbody>
+      {% for row in rows %}
+        <tr>
+          {% if can_write %}<td><input type="checkbox" class="form-check-input" name="ids" value="{{ row.pk }}" aria-label="Выбрать"></td>{% endif %}
+          {% for key, label in columns %}
+            <td class="{% if forloop.first %}wrap{% endif %}">
+              {% if forloop.first %}
+                {% if cfg.detail %}<a href="{% url 'dashboard:detail' cfg.slug row.pk %}">{{ row|get_attr:key }}</a>
+                {% elif can_write %}<a href="{% url 'dashboard:update' cfg.slug row.pk %}">{{ row|get_attr:key }}</a>
+                {% else %}{{ row|get_attr:key }}{% endif %}
+              {% else %}{{ row|get_attr:key }}{% endif %}
+            </td>
+          {% endfor %}
+          <td><div class="tbl-actions">
+            {% if cfg.detail %}<a class="btn btn-sm" href="{% url 'dashboard:detail' cfg.slug row.pk %}">Открыть</a>{% endif %}
+            {% if cfg.slug == 'stock' and can_write %}
+              <a class="btn btn-sm btn-warn" href="{% url 'dashboard:stock-adjust' row.pk %}">Корректировать</a>
+            {% elif can_write %}
+              <a class="btn btn-sm btn-primary" href="{% url 'dashboard:update' cfg.slug row.pk %}">Изменить</a>
+              <a class="btn btn-sm btn-danger" href="{% url 'dashboard:delete' cfg.slug row.pk %}">Удалить</a>
+            {% endif %}
+          </div></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="12" class="empty">Ничего не найдено. Измените условия отбора.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% if pages > 1 %}
+      <div class="pager">
+        {% if has_prev %}<a class="btn btn-sm" href="?{% for k,v in keep.items %}{{ k }}={{ v|urlencode }}&{% endfor %}page={{ page|add:-1 }}">← Назад</a>{% endif %}
+        {% for p in page_range %}
+          <a class="btn btn-sm {% if p == page %}btn-primary{% endif %}"
+             href="?{% for k,v in keep.items %}{{ k }}={{ v|urlencode }}&{% endfor %}page={{ p }}">{{ p }}</a>
+        {% endfor %}
+        {% if has_next %}<a class="btn btn-sm" href="?{% for k,v in keep.items %}{{ k }}={{ v|urlencode }}&{% endfor %}page={{ page|add:1 }}">Вперёд →</a>{% endif %}
+        <span class="small muted">стр. {{ page }} из {{ pages }}</span>
+      </div>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

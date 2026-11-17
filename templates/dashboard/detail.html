@@ -1,0 +1,77 @@
+{% extends 'dashboard/base.html' %}
+{% load static dash %}
+{% block title %}{{ obj }} — {{ cfg.title }}{% endblock %}
+{% block panel %}
+<div class="row-between mb">
+  <a class="btn" href="{% url 'dashboard:list' cfg.slug %}">← К списку</a>
+  <div class="row">
+    {% for action, label, cls in actions %}
+      {% if action == 'edit' %}
+        <a class="btn {{ cls }}" href="{% url 'dashboard:update' cfg.slug obj.pk %}">{{ label }}</a>
+      {% elif action == 'delete' %}
+        <a class="btn {{ cls }}" href="{% url 'dashboard:delete' cfg.slug obj.pk %}">{{ label }}</a>
+      {% else %}
+        <form method="post" action="{% url 'dashboard:supply-action' obj.pk action %}"
+              data-confirm="{{ label }}? Остатки на складе будут пересчитаны.">
+          {% csrf_token %}<button class="btn {{ cls }}">{{ label }}</button>
+        </form>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card-x mb">
+  <div class="head"><h2>{{ obj }}</h2>
+    {% if cfg.slug == 'orders' %}{% include 'orders/_status_badge.html' with status=obj.status %}{% endif %}
+    {% if cfg.slug == 'supplies' %}<span class="badge badge-info">{{ obj.status }}</span>{% endif %}
+  </div>
+  <div class="body">
+    <div class="grid grid-form">
+      {% for label, value in fields %}
+        <div><div class="form-label">{{ label }}</div><div class="bold">{{ value }}</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% for block in blocks %}
+  <div class="card-x mb">
+    <div class="head"><h2>{{ block.title }}</h2><span class="badge">{{ block.rows|length }}</span></div>
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr>{% for key, label in block.columns %}<th>{{ label }}</th>{% endfor %}
+        {% if block.is_order_items and can_write %}<th>Действие</th>{% endif %}</tr></thead>
+      <tbody>
+      {% for row in block.rows %}
+        <tr>
+          {% for key, label in block.columns %}<td class="{% if forloop.first %}wrap{% endif %}">{{ row|get_attr:key }}</td>{% endfor %}
+          {% if block.is_order_items and can_write %}
+            <td><form method="post" action="{% url 'dashboard:order-item-remove' row.pk %}"
+                      data-confirm="Удалить позицию? Остаток вернётся на склад списания.">
+                {% csrf_token %}<button class="btn btn-sm btn-danger">Удалить</button></form></td>
+          {% endif %}
+        </tr>
+      {% empty %}<tr><td colspan="8" class="empty">Позиций нет</td></tr>{% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+{% endfor %}
+
+{% if add_form %}
+  <div class="card-x">
+    <div class="head"><h2>Добавить позицию в заказ</h2></div>
+    <div class="body">
+      <form method="post" action="{% url 'dashboard:order-item-add' obj.pk %}" class="row">
+        {% csrf_token %}
+        {% for field in add_form %}
+          <div class="field grow">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+          </div>
+        {% endfor %}
+        <button class="btn btn-success" style="align-self:flex-end">Добавить и списать</button>
+      </form>
+      <div class="hint mt">Цена продажи по умолчанию берётся из карточки товара с учётом действующей скидки.</div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

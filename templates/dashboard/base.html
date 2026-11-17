@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static dash %}
+{% block navname %}Панель управления{% endblock %}
+{% block content %}
+<div class="panel">
+  <aside class="panel-side on-dark">
+    <a class="side-link {% if not cfg %}active{% endif %}" href="{% url 'dashboard:home' %}">
+      <img src="{% static 'img/system/icon/svg/square-chart-gantt.svg' %}" alt="" class="icon icon-sm icon-light">
+      Сводка
+    </a>
+    {% for group in nav %}
+      <h6>{{ group.title }}</h6>
+      {% for item in group.items %}
+        <a class="side-link {% if item.active %}active{% endif %}" href="{% url 'dashboard:list' item.slug %}">{{ item.title }}</a>
+      {% endfor %}
+    {% endfor %}
+
+    <h6>Вид интерфейса</h6>
+    <div class="col" style="gap:.45rem;padding:.2rem .3rem">
+      <label class="small" style="color:#c7d0e8">Плотность
+        <select class="form-select" data-ui="density">
+          <option value="auto">Авто</option><option value="compact">Компактная</option>
+          <option value="normal">Обычная</option><option value="large">Крупная</option>
+        </select>
+      </label>
+      <label class="small" style="color:#c7d0e8">Строки таблиц
+        <select class="form-select" data-ui="rows">
+          <option value="compact">Плотные</option><option value="normal">Обычные</option>
+          <option value="comfy">Просторные</option>
+        </select>
+      </label>
+      <label class="form-check small" style="color:#c7d0e8">
+        <input type="checkbox" class="form-check-input" data-ui="sticky"> Липкие заголовки
+      </label>
+      <label class="form-check small" style="color:#c7d0e8">
+        <input type="checkbox" class="form-check-input" data-ui="contrast"> Повышенный контраст
+      </label>
+      <label class="form-check small" style="color:#c7d0e8">
+        <input type="checkbox" class="form-check-input" data-ui="motion"> Отключить анимацию
+      </label>
+      <label class="form-check small" style="color:#c7d0e8">
+        <input type="checkbox" class="form-check-input" data-ui="sidebar"> Показывать меню
+      </label>
+      <div class="row" style="gap:.4rem">
+        <span class="badge" id="scale-value">100%</span>
+        <button type="button" class="btn btn-sm btn-ghost" id="ui-reset" style="color:#dbe3f7;border-color:#3a4a7a">Сбросить</button>
+      </div>
+    </div>
+  </aside>
+  <main class="panel-main">{% block panel %}{% endblock %}</main>
+</div>
+{% endblock %}
